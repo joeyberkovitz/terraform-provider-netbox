@@ -20,8 +20,19 @@ func dataSourceNetboxPrefix() *schema.Resource {
 			},
 			"cidr": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				AtLeastOneOf: []string{"cidr", "vlan_vid"},
 				ValidateFunc: validation.IsCIDR,
+			},
+			"vlan_vid": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				AtLeastOneOf: []string{"cidr", "vlan_vid"},
+				ValidateFunc: validation.IntBetween(1, 4094),
+			},
+			"vrf_id": {
+				Type:     schema.TypeInt,
+				Computed: true,
 			},
 		},
 	}
@@ -30,10 +41,15 @@ func dataSourceNetboxPrefix() *schema.Resource {
 func dataSourceNetboxPrefixRead(d *schema.ResourceData, m interface{}) error {
 	api := m.(*client.NetBoxAPI)
 
-	cidr := d.Get("cidr").(string)
-
 	params := ipam.NewIpamPrefixesListParams()
-	params.Prefix = &cidr
+
+	if cidr, ok := d.Get("cidr").(string); ok && cidr != "" {
+		params.Prefix = strToPtr(cidr)
+	}
+
+	if vid, ok := d.Get("vlan_vid").(int); ok && vid != 0 {
+		params.VlanVid = float64ToPtr(float64(vid))
+	}
 
 	limit := int64(2) // Limit of 2 is enough
 	params.Limit = &limit
@@ -51,6 +67,9 @@ func dataSourceNetboxPrefixRead(d *schema.ResourceData, m interface{}) error {
 	}
 	result := res.GetPayload().Results[0]
 	d.Set("id", result.ID)
+	if result.Vrf != nil {
+		d.Set("vrf_id", result.Vrf.ID)
+	}
 	d.SetId(strconv.FormatInt(result.ID, 10))
 	return nil
 }

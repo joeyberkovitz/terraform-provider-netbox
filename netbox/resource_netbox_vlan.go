@@ -59,6 +59,10 @@ func resourceNetboxVlan() *schema.Resource {
 				Required: true,
 				Set:      schema.HashString,
 			},
+			"group_id": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
 		},
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -90,6 +94,10 @@ func resourceNetboxVlanCreate(d *schema.ResourceData, m interface{}) error {
 
 	if roleID, ok := d.GetOk("role_id"); ok {
 		data.Role = int64ToPtr(int64(roleID.(int)))
+	}
+
+	if groupID, ok := d.GetOk("group_id"); ok {
+		data.Group = int64ToPtr(int64(groupID.(int)))
 	}
 
 	data.Tags, _ = getNestedTagListFromResourceDataSet(api, d.Get("tags"))
@@ -139,6 +147,9 @@ func resourceNetboxVlanRead(d *schema.ResourceData, m interface{}) error {
 	if vlan.Role != nil {
 		d.Set("role_id", vlan.Role.ID)
 	}
+	if vlan.Group != nil {
+		d.Set("group_id", vlan.Group.ID)
+	}
 
 	return nil
 }
@@ -167,6 +178,10 @@ func resourceNetboxVlanUpdate(d *schema.ResourceData, m interface{}) error {
 
 	if roleID, ok := d.GetOk("role_id"); ok {
 		data.Role = int64ToPtr(int64(roleID.(int)))
+	}
+
+	if groupID, ok := d.GetOk("group_id"); ok {
+		data.Group = int64ToPtr(int64(groupID.(int)))
 	}
 
 	data.Tags, _ = getNestedTagListFromResourceDataSet(api, d.Get("tags"))

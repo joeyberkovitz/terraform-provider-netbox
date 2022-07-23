@@ -1,12 +1,13 @@
 package netbox
 
 import (
+	"strconv"
+
 	"github.com/fbreckle/go-netbox/netbox/client"
 	"github.com/fbreckle/go-netbox/netbox/client/ipam"
 	"github.com/fbreckle/go-netbox/netbox/models"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"strconv"
 )
 
 func resourceNetboxAvailableIPAddress() *schema.Resource {
@@ -63,6 +64,13 @@ func resourceNetboxAvailableIPAddress() *schema.Resource {
 				},
 				Optional: true,
 				Set:      schema.HashString,
+			},
+			"custom_fields": &schema.Schema{
+				Type: schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
 			},
 		},
 		Importer: &schema.ResourceImporter{
@@ -181,6 +189,10 @@ func resourceNetboxAvailableIPAddressUpdate(d *schema.ResourceData, m interface{
 
 	if tenantID, ok := d.GetOk("tenant_id"); ok {
 		data.Tenant = int64ToPtr(int64(tenantID.(int)))
+	}
+
+	if customFieldsMap, ok := d.Get("custom_fields").(map[string]interface{}); ok {
+		data.CustomFields = customFieldsMap
 	}
 
 	data.Tags, _ = getNestedTagListFromResourceDataSet(api, d.Get("tags"))

@@ -62,6 +62,13 @@ func resourceNetboxIPAddress() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"custom_fields": &schema.Schema{
+				Type: schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+			},
 		},
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -80,6 +87,10 @@ func resourceNetboxIPAddressCreate(d *schema.ResourceData, m interface{}) error 
 
 	if dnsName, ok := d.GetOk("dns_name"); ok {
 		data.DNSName = dnsName.(string)
+	}
+
+	if customFieldsMap, ok := d.Get("custom_fields").(map[string]interface{}); ok {
+		data.CustomFields = customFieldsMap
 	}
 
 	data.Tags, _ = getNestedTagListFromResourceDataSet(api, d.Get("tags"))
@@ -139,6 +150,7 @@ func resourceNetboxIPAddressRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("description", res.GetPayload().Description)
 	d.Set("status", res.GetPayload().Status.Value)
 	d.Set("tags", getTagListFromNestedTagList(res.GetPayload().Tags))
+	d.Set("custom_fields", res.GetPayload().CustomFields)
 	return nil
 }
 
@@ -188,6 +200,10 @@ func resourceNetboxIPAddressUpdate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	data.Tags, _ = getNestedTagListFromResourceDataSet(api, d.Get("tags"))
+
+	if customFieldsMap, ok := d.Get("custom_fields").(map[string]interface{}); ok {
+		data.CustomFields = customFieldsMap
+	}
 
 	params := ipam.NewIpamIPAddressesUpdateParams().WithID(id).WithData(&data)
 

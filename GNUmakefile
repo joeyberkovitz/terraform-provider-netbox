@@ -38,6 +38,12 @@ docker-down:
 docs:
 	go generate
 
+build:
+	@echo " -> Building"
+	CGO_ENABLED=0 go build -trimpath -o terraform-provider-netbox
+	@echo "Built terraform-provider-netbox"
+
+
 #! Development 
 # The following make goals are only for local usage 
 .PHONY: fmt
