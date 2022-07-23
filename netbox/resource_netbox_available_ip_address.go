@@ -22,10 +22,12 @@ func resourceNetboxAvailableIPAddress() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ExactlyOneOf: []string{"prefix_id", "ip_range_id"},
+				ForceNew:     true,
 			},
 			"ip_range_id": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				ForceNew: true,
 			},
 			"ip_address": &schema.Schema{
 				Type:     schema.TypeString,
@@ -34,14 +36,17 @@ func resourceNetboxAvailableIPAddress() *schema.Resource {
 			"interface_id": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				ForceNew: true,
 			},
 			"vrf_id": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				ForceNew: true,
 			},
 			"tenant_id": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				ForceNew: true,
 			},
 			"status": &schema.Schema{
 				Type:         schema.TypeString,
