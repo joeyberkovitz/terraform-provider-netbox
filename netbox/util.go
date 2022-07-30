@@ -16,6 +16,10 @@ func getInt64FromString(s string) int64 {
 	return res
 }
 
+func nToPtr[N interface{}](n N) *N {
+	return &n
+}
+
 func strToPtr(str string) *string {
 	return &str
 }
@@ -42,4 +46,14 @@ func toInt64List(a interface{}) []int64 {
 		}
 	}
 	return intList
+}
+
+func toNList[N comparable](a interface{}) []N {
+	retList := []N{}
+	for _, item := range a.(*schema.Set).List() {
+		if n, ok := item.(N); ok {
+			retList = append(retList, N(n))
+		}
+	}
+	return retList
 }
